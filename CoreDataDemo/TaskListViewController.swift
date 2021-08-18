@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CoreData
 
 enum Status {
     case save, editing
@@ -15,7 +14,6 @@ enum Status {
 class TaskListViewController: UITableViewController {
 
     // MARK: Private properties
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let dataManager =  DataManager.shared
     private let cellID = "cell"
     
@@ -29,7 +27,21 @@ class TaskListViewController: UITableViewController {
         view.backgroundColor = .white
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
         setupNavigationBar()
+        
         taskList = dataManager.fetchData()
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        taskList.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
+        let task = taskList[indexPath.row]
+        var content = cell.defaultContentConfiguration()
+        content.text = task.name
+        cell.contentConfiguration = content
+        return cell
     }
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
@@ -50,10 +62,13 @@ class TaskListViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         
         status = .editing
-        showAlert(with: "New Task", and: "What do you want to do?", indexPath: indexPath.row)
+        showAlert(with: "Editing Task", and: "Edit please.", indexPath: indexPath.row)
     }
+}
 
-    // MARK: private methods
+// MARK: private methods
+extension TaskListViewController {
+    
     private func setupNavigationBar() {
         title = "Task List"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -120,21 +135,6 @@ class TaskListViewController: UITableViewController {
         }
         
         present(alert, animated: true)
-    }
-}
-
-extension TaskListViewController {
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        taskList.count
-    }
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
-        let task = taskList[indexPath.row]
-        var content = cell.defaultContentConfiguration()
-        content.text = task.name
-        cell.contentConfiguration = content
-        return cell
     }
 }
 
